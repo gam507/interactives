@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інтерактивний тренажер: Основні елементи ООП (Python, 10 клас)</title>
+    <style>
+        :root {
+            --bg-primary: #f4f6f9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #eef2f7;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #dbeafe;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --error: #dc2626;
+            --error-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --border: #cbd5e1;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --accent-light: #1e3a8a;
+            --success: #22c55e;
+            --success-bg: #14532d;
+            --error: #ef4444;
+            --error-bg: #7f1d1d;
+            --warning: #f59e0b;
+            --warning-bg: #78350f;
+            --border: #475569;
+            --code-bg: #0b0f19;
+            --code-text: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.25s, color 0.25s;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand { display: flex; align-items: center; gap: 0.75rem; }
+
+        .brand-icon {
+            background: var(--accent);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            font-family: monospace;
+        }
+
+        .brand h1 { font-size: 1.25rem; font-weight: 700; }
+        .brand p { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .score-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid var(--accent);
+        }
+
+        [data-theme="dark"] .score-badge { color: #93c5fd; }
+
+        .theme-btn, .reset-btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.45rem 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover, .reset-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        main { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem 3rem; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover { color: var(--accent); background: var(--bg-tertiary); }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header h2 { font-size: 1.35rem; margin-bottom: 0.35rem; color: var(--accent); }
+        .section-header p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .theory-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .theory-card:hover { transform: translateY(-3px); }
+
+        .theory-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .theory-title { font-size: 1.15rem; font-weight: 700; color: var(--accent); }
+
+        .theory-tag {
+            font-size: 0.75rem;
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .theory-desc { font-size: 0.95rem; margin-bottom: 0.75rem; }
+
+        .theory-analogy {
+            background: var(--bg-tertiary);
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin-bottom: 0.85rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        pre.code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            line-height: 1.45;
+        }
+
+        .kw { color: #cba6f7; font-weight: bold; }
+        .fn { color: #89b4fa; }
+        .str { color: #a6e3a1; }
+        .num { color: #fab387; }
+        .cmt { color: #6c7086; font-style: italic; }
+        .cls { color: #f9e2af; font-weight: bold; }
+
+        .inspector-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 850px) { .inspector-layout { grid-template-columns: 1fr; } }
+
+        .code-window {
+            background: var(--code-bg);
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .window-dots { display: flex; gap: 6px; margin-bottom: 0.85rem; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-r { background: #ef4444; }
+        .dot-y { background: #f59e0b; }
+        .dot-g { background: #22c55e; }
+
+        .code-line {
+            display: flex;
+            align-items: center;
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 0.92rem;
+            color: var(--code-text);
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .code-line:hover { background: rgba(255, 255, 255, 0.1); }
+        .code-line.correct-line { background: rgba(34, 197, 94, 0.25); border-left: 3px solid #22c55e; }
+        .code-line.wrong-line { background: rgba(239, 68, 68, 0.25); border-left: 3px solid #ef4444; }
+
+        .line-num { color: #64748b; width: 28px; user-select: none; flex-shrink: 0; }
+
+        .inspector-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .task-prompt {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--accent-light);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+
+        .feedback-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .feedback-box.success {
+            display: block;
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .feedback-box.error {
+            display: block;
+            background: var(--error-bg);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--accent-hover); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        .btn-outline:hover { background: var(--accent); color: white; }
+
+        .matching-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
+        @media (max-width: 768px) { .matching-grid { grid-template-columns: 1fr; } }
+
+        .match-col { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .match-item {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .match-item:hover:not(.matched) { border-color: var(--accent); transform: translateX(3px); }
+        .match-item.selected { border-color: var(--accent); background: var(--accent-light); font-weight: 700; }
+
+        .match-item.matched {
+            border-color: var(--success);
+            background: var(--success-bg);
+            color: var(--success);
+            cursor: default;
+            opacity: 0.85;
+        }
+
+        .match-item.shake { animation: shake 0.35s; border-color: var(--error); background: var(--error-bg); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .builder-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .code-editor-box {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 10px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-select {
+            background: #313244;
+            color: #f9e2af;
+            border: 1px solid #585b70;
+            border-radius: 5px;
+            padding: 0.15rem 0.45rem;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .code-select:focus { outline: 2px solid var(--accent); }
+        .code-select.correct-sel { border-color: #22c55e; background: #14532d; color: #86efac; }
+        .code-select.wrong-sel { border-color: #ef4444; background: #7f1d1d; color: #fca5a5; }
+
+        .console-output {
+            background: #090d16;
+            color: #4ade80;
+            font-family: monospace;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 4px solid #22c55e;
+            display: none;
+        }
+
+        .quiz-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .quiz-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.25rem 0; }
+
+        .quiz-option {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            padding: 0.9rem 1.15rem;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.98rem;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-light); font-weight: 600; }
+
+        .result-card { text-align: center; padding: 1.5rem; }
+
+        .grade-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .grade-num { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+        .grade-label { font-size: 0.8rem; opacity: 0.9; }
+
+        .review-list { text-align: left; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; }
+
+        .review-item {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <div class="brand">
+            <div class="brand-icon">OOP</div>
+            <div>
+                <h1>Інтерактивний тренажер: Основні елементи ООП</h1>
+                <p>Інформатика • 10 клас • Об'єктно-орієнтоване програмування (Python)</p>
+            </div>
+        </div>
+        <div class="header-controls">
+            <div class="score-badge" id="totalScoreDisplay">Бали: 0</div>
+            <button type="button" class="theme-btn" id="themeToggle" title="Змінити тему">🌙 Темна тема</button>
+            <button type="button" class="reset-btn" id="resetAllBtn" title="Скинути прогрес">↺ Скинути</button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <nav class="nav-tabs" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="theory">📘 1. Довідник (Теорія)</button>
+        <button type="button" class="tab-btn" data-tab="inspector">🔍 2. Впізнай елемент</button>
+        <button type="button" class="tab-btn" data-tab="matching">🔗 3. Співставлення</button>
+        <button type="button" class="tab-btn" data-tab="builder">🧩 4. Конструктор коду</button>
+        <button type="button" class="tab-btn" data-tab="quiz">🏆 5. Контрольний тест</button>
+    </nav>
+
+    <section id="theory" class="tab-content active">
+        <div class="section-header">
+            <h2>Шпаргалка з основних елементів ООП у Python</h2>
+            <p>Ознайомся з ключовими поняттями, життєвими аналогіями та прикладами коду перед виконанням практичних завдань.</p>
+        </div>
+        <div class="theory-grid" id="theoryGrid"></div>
+    </section>
+
+    <section id="inspector" class="tab-content">
+        <div class="section-header flex-between">
+            <div>
+                <h2>Режим 1: Впізнай елемент ООП у коді</h2>
+                <p>Прочитай завдання праворуч та натисни на відповідний рядок у вікні коду Python ліворуч.</p>
+            </div>
+            <div>
+                <span class="score-badge" id="inspectorProgress">Завдання 1 / 8</span>
+            </div>
+        </div>
+
+        <div class="inspector-layout">
+            <div class="code-window" id="inspectorCodeWindow">
+                <div class="window-dots">
+                    <span class="dot dot-r"></span>
+                    <span class="dot dot-y"></span>
+                    <span class="dot dot-g"></span>
+                </div>
+                <div id="codeLinesContainer"></div>
+            </div>
+
+            <div class="inspector-panel">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">ЗАВДАННЯ:</div>
+                    <div class="task-prompt" id="inspectorQuestion">Завантаження...</div>
+                    <div class="feedback-box" id="inspectorFeedback"></div>
+                </div>
+                <div class="flex-between" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline" id="inspectorHintBtn">💡 Підказка</button>
+                    <button type="button" class="btn" id="inspectorNextBtn" disabled>Наступне завдання →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="matching" class="tab-content">
+        <div class="section-header flex-between">
+            <div>
+                <h2>Режим 2: Співставлення термінів та визначень</h2>
+                <p>Обери термін у лівій колонці, а потім натисни на його точне визначення у правій колонці.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="score-badge" id="matchProgress">Знайдено: 0 / 6</span>
+                <button type="button" class="btn btn-outline" id="newMatchSetBtn">Інший набір</button>
+            </div>
+        </div>
+
+        <div class="matching-grid">
+            <div class="match-col" id="matchTermsCol"></div>
+            <div class="match-col" id="matchDefsCol"></div>
+        </div>
+        <div class="feedback-box success" id="matchCompleteMsg" style="margin-top: 1.5rem;">
+            🎉 Чудово! Усі пари знайдено правильно! Натисніть «Інший набір» для додаткового тренування або переходьте до наступного режиму.
+        </div>
+    </section>
+
+    <section id="builder" class="tab-content">
+        <div class="section-header flex-between">
+            <div>
+                <h2>Режим 3: Конструктор коду Python</h2>
+                <p>Заповни пропуски у програмному коді, обравши правильні ключові слова, методи або аргументи зі списків.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="score-badge" id="builderProgress">Задача 1 / 4</span>
+            </div>
+        </div>
+
+        <div class="builder-card">
+            <h3 id="builderTitle" style="color: var(--accent); margin-bottom: 0.35rem;"></h3>
+            <p id="builderDesc" style="color: var(--text-secondary);"></p>
+
+            <div class="code-editor-box" id="builderCodeContainer"></div>
+
+            <div class="flex-between">
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn" id="checkBuilderBtn">▶ Перевірити та виконати</button>
+                    <button type="button" class="btn btn-outline" id="resetBuilderBtn">Очистити</button>
+                </div>
+                <button type="button" class="btn btn-outline" id="nextBuilderBtn">Наступна задача →</button>
+            </div>
+
+            <div class="feedback-box" id="builderFeedback"></div>
+            <div class="console-output" id="builderConsole"></div>
+        </div>
+    </section>
+
+    <section id="quiz" class="tab-content">
+        <div class="section-header flex-between">
+            <div>
+                <h2>Режим 4: Контрольний тест (12-бальна шкала)</h2>
+                <p>Дай відповідь на 10 запитань з теорії та практики ООП, щоб отримати підсумкову оцінку.</p>
+            </div>
+            <span class="score-badge" id="quizCounter">Запитання 1 / 10</span>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div class="quiz-progress-bar">
+                <div class="quiz-progress-fill" id="quizProgressFill"></div>
+            </div>
+            <div id="quizBody"></div>
+        </div>
+    </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let totalScore = 0;
+    const completedTasks = new Set();
+
+    function addScore(taskId, points) {
+        if (!completedTasks.has(taskId)) {
+            completedTasks.add(taskId);
+            totalScore += points;
+            document.getElementById('totalScoreDisplay').textContent = 'Бали: ' + totalScore;
+        }
+    }
+
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            themeBtn.textContent = '🌙 Темна тема';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.textContent = '☀️ Світла тема';
+        }
+    });
+
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            tabBtns.forEach(function(b) { b.classList.remove('active'); });
+            tabContents.forEach(function(c) { c.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+        });
+    });
+
+    const theoryData = [
+        {
+            title: "1. Клас (Class)",
+            tag: "class Name:",
+            desc: "Шаблон, модель або креслення, яке описує спільні властивості (атрибути) та поведінку (методи) майбутніх об'єктів.",
+            analogy: "💡 Аналогія: Архітектурне креслення будинку або форма для випікання печива.",
+            code: '<span class="kw">class</span> <span class="cls">Car</span>:\n    <span class="cmt"># Опис властивостей та дій</span>\n    <span class="kw">pass</span>'
+        },
+        {
+            title: "2. Об'єкт (Екземпляр класу)",
+            tag: "obj = Class()",
+            desc: "Конкретний екземпляр, створений на основі класу. Кожен об'єкт має власні значення атрибутів у пам'яті комп'ютера.",
+            analogy: "💡 Аналогія: Реальний збудований будинок за кресленням або конкретне спечене печиво.",
+            code: 'my_car = <span class="cls">Car</span>()\nfriend_car = <span class="cls">Car</span>()'
+        },
+        {
+            title: "3. Конструктор __init__",
+            tag: "def __init__(self):",
+            desc: "Спеціальний метод класу, який автоматично викликається під час створення нового об'єкта для ініціалізації його початкових даних.",
+            analogy: "💡 Аналогія: Налаштування нового смартфона під час першого ввімкнення.",
+            code: '<span class="kw">class</span> <span class="cls">Car</span>:\n    <span class="kw">def</span> <span class="fn">__init__</span>(self, brand):\n        self.brand = brand'
+        },
+        {
+            title: "4. Атрибути (Поля / Властивості)",
+            tag: "self.attribute",
+            desc: "Змінні, що належать класу або конкретному об'єкту і зберігають його стан чи характеристики. Параметр self вказує на поточний об'єкт.",
+            analogy: "💡 Аналогія: Колір, марка та швидкість конкретного автомобіля.",
+            code: 'c = <span class="cls">Car</span>(<span class="str">"Audi"</span>)\n<span class="fn">print</span>(c.brand)  <span class="cmt"># Audi</span>'
+        },
+        {
+            title: "5. Методи класу",
+            tag: "def method(self):",
+            desc: "Функції, визначені всередині класу, які описують дії або поведінку об'єкта. Першим параметром завжди приймають self.",
+            analogy: "💡 Аналогія: Дії автомобіля — їхати(), гальмувати(), сигналити().",
+            code: '<span class="kw">class</span> <span class="cls">Car</span>:\n    <span class="kw">def</span> <span class="fn">beep</span>(self):\n        <span class="fn">print</span>(<span class="str">"Бі-біп!"</span>)'
+        },
+        {
+            title: "6. Інкапсуляція",
+            tag: "self.__private",
+            desc: "Приховування внутрішньої реалізації та захист даних об'єкта від прямого неконтрольованого втручання ззовні (подвійне підкреслення __).",
+            analogy: "💡 Аналогія: Водій натискає педаль газу, не втручаючись напряму у роботу інжектора двигуна.",
+            code: '<span class="kw">class</span> <span class="cls">Bank</span>:\n    <span class="kw">def</span> <span class="fn">__init__</span>(self):\n        self.__balance = <span class="num">1000</span>'
+        },
+        {
+            title: "7. Наслідування (Успадкування)",
+            tag: "class Child(Parent):",
+            desc: "Механізм створення нового (дочірнього) класу на основі вже існуючого (батьківського) із запозиченням його атрибутів і методів.",
+            analogy: "💡 Аналогія: Електромобіль успадковує всі базові властивості Автомобіля, додаючи ємність батареї.",
+            code: '<span class="kw">class</span> <span class="cls">ElectricCar</span>(<span class="cls">Car</span>):\n    <span class="kw">pass</span>'
+        },
+        {
+            title: "8. Поліморфізм",
+            tag: "Одна назва — різна дія",
+            desc: "Здатність об'єктів різних класів по-різному реагувати на виклик методу з однаковою назвою.",
+            analogy: "💡 Аналогія: Команда «Голос!»: собака гавкає, а кіт нявчить.",
+            code: '<span class="kw">for</span> animal <span class="kw">in</span> [dog, cat]:\n    animal.<span class="fn">speak</span>()'
+        }
+    ];
+
+    const theoryGrid = document.getElementById('theoryGrid');
+    theoryData.forEach(function(item) {
+        const card = document.createElement('div');
+        card.className = 'theory-card';
+        card.innerHTML =
+            '<div>' +
+                '<div class="theory-card-header">' +
+                    '<span class="theory-title">' + item.title + '</span>' +
+                    '<span class="theory-tag">' + item.tag + '</span>' +
+                '</div>' +
+                '<p class="theory-desc">' + item.desc + '</p>' +
+                '<div class="theory-analogy">' + item.analogy + '</div>' +
+            '</div>' +
+            '<pre class="code-block">' + item.code + '</pre>';
+        theoryGrid.appendChild(card);
+    });
+
+    const inspectorCode = [
+        { num: 1, html: '<span class="kw">class</span> <span class="cls">Device</span>:' },
+        { num: 2, html: '    category = <span class="str">"Електроніка"</span>' },
+        { num: 3, html: '' },
+        { num: 4, html: '    <span class="kw">def</span> <span class="fn">__init__</span>(self, model, price):' },
+        { num: 5, html: '        self.model = model' },
+        { num: 6, html: '        self.__price = price' },
+        { num: 7, html: '' },
+        { num: 8, html: '    <span class="kw">def</span> <span class="fn">turn_on</span>(self):' },
+        { num: 9, html: '        <span class="fn">print</span>(<span class="str">f"{self.model} увімкнено"</span>)' },
+        { num: 10, html: '' },
+        { num: 11, html: '<span class="kw">class</span> <span class="cls">Smartphone</span>(<span class="cls">Device</span>):' },
+        { num: 12, html: '    <span class="kw">def</span> <span class="fn">turn_on</span>(self):' },
+        { num: 13, html: '        <span class="fn">print</span>(<span class="str">f"Смартфон {self.model} вітає вас!"</span>)' },
+        { num: 14, html: '' },
+        { num: 15, html: 'phone = <span class="cls">Smartphone</span>(<span class="str">"Pixel 9"</span>, <span class="num">32000</span>)' },
+        { num: 16, html: 'phone.<span class="fn">turn_on</span>()' }
+    ];
+
+    const inspectorTasks = [
+        {
+            q: "Натисни на рядок, у якому оголошується базовий (батьківський) клас Device.",
+            targetLine: 1,
+            hint: "Клас у Python завжди оголошується за допомогою ключового слова class.",
+            explanation: "Правильно! Рядок 1 (`class Device:`) створює шаблон батьківського класу."
+        },
+        {
+            q: "Знайди рядок, де оголошено конструктор класу Device.",
+            targetLine: 4,
+            hint: "Конструктор у Python має спеціальне ім'я з подвійним підкресленням з обох боків.",
+            explanation: "Вірно! `def __init__(self, model, price):` — це конструктор, який ініціалізує об'єкт."
+        },
+        {
+            q: "Вкажи рядок, де створюється приватний (інкапсульований) атрибут ціни.",
+            targetLine: 6,
+            hint: "Приватні атрибути в Python починаються з двох символів підкреслення __.",
+            explanation: "Чудово! `self.__price = price` демонструє інкапсуляцію — захист поля від прямого доступу."
+        },
+        {
+            q: "Натисни на рядок, де створюється атрибут класу (спільний для всіх об'єктів).",
+            targetLine: 2,
+            hint: "Атрибут класу записується безпосередньо всередині класу поза методами (без self).",
+            explanation: "Точно! `category = \"Електроніка\"` — це атрибут класу."
+        },
+        {
+            q: "Знайди рядок, який демонструє наслідування (створення дочірнього класу).",
+            targetLine: 11,
+            hint: "У дужках після назви нового класу вказується ім'я батьківського класу.",
+            explanation: "Правильно! `class Smartphone(Device):` успадковує властивості та методи від Device."
+        },
+        {
+            q: "Вкажи рядок, де перевизначається метод батьківського класу (прояв поліморфізму).",
+            targetLine: 12,
+            hint: "Шукай оголошення методу turn_on всередині дочірнього класу Smartphone.",
+            explanation: "Вірно! Дочірній клас перевизначає метод `turn_on(self)` для власної поведінки."
+        },
+        {
+            q: "Натисни на рядок, де створюється конкретний об'єкт (екземпляр) класу Smartphone.",
+            targetLine: 15,
+            hint: "Об'єкт створюється викликом імені класу з передачею аргументів у дужках.",
+            explanation: "Молодець! У рядку 15 створюється об'єкт `phone` класу `Smartphone`."
+        },
+        {
+            q: "Знайди рядок, у якому відбувається виклик методу для створеного об'єкта.",
+            targetLine: 16,
+            hint: "Для виклику методу використовується крапкова нотація: об'єкт.метод().",
+            explanation: "Бездоганно! `phone.turn_on()` викликає перевизначений метод для об'єкта `phone`."
+        }
+    ];
+
+    let currentInspectorIdx = 0;
+    let inspectorAnswered = false;
+
+    function renderInspectorCode() {
+        const container = document.getElementById('codeLinesContainer');
+        container.innerHTML = '';
+        inspectorCode.forEach(function(line) {
+            const div = document.createElement('div');
+            div.className = 'code-line';
+            div.dataset.line = line.num;
+            div.innerHTML = '<span class="line-num">' + line.num + '</span><span>' + (line.html || ' ') + '</span>';
+            div.addEventListener('click', function() { handleLineClick(line.num, div); });
+            container.appendChild(div);
+        });
+    }
+
+    function loadInspectorTask(idx) {
+        inspectorAnswered = false;
+        const task = inspectorTasks[idx];
+        document.getElementById('inspectorProgress').textContent = 'Завдання ' + (idx + 1) + ' / ' + inspectorTasks.length;
+        document.getElementById('inspectorQuestion').textContent = task.q;
+        const fb = document.getElementById('inspectorFeedback');
+        fb.className = 'feedback-box';
+        fb.removeAttribute('style');
+        fb.textContent = '';
+        document.getElementById('inspectorNextBtn').disabled = true;
+
+        document.querySelectorAll('.code-line').forEach(function(el) {
+            el.classList.remove('correct-line', 'wrong-line');
+        });
+    }
+
+    function handleLineClick(lineNum, element) {
+        if (inspectorAnswered) return;
+        const task = inspectorTasks[currentInspectorIdx];
+        const fb = document.getElementById('inspectorFeedback');
+        fb.removeAttribute('style');
+
+        document.querySelectorAll('.code-line').forEach(function(el) { el.classList.remove('wrong-line'); });
+
+        if (lineNum === task.targetLine) {
+            inspectorAnswered = true;
+            element.classList.add('correct-line');
+            fb.className = 'feedback-box success';
+            fb.textContent = '✅ ' + task.explanation + ' (+10 балів)';
+            document.getElementById('inspectorNextBtn').disabled = false;
+            addScore('insp_' + currentInspectorIdx, 10);
+        } else {
+            element.classList.add('wrong-line');
+            fb.className = 'feedback-box error';
+            fb.textContent = '❌ Це рядок ' + lineNum + '. Спробуй ще раз або скористайся підказкою!';
+        }
+    }
+
+    document.getElementById('inspectorHintBtn').addEventListener('click', function() {
+        const task = inspectorTasks[currentInspectorIdx];
+        const fb = document.getElementById('inspectorFeedback');
+        fb.className = 'feedback-box success';
+        fb.style.background = 'var(--warning-bg)';
+        fb.style.color = 'var(--warning)';
+        fb.style.borderColor = 'var(--warning)';
+        fb.textContent = '💡 Підказка: ' + task.hint;
+    });
+
+    document.getElementById('inspectorNextBtn').addEventListener('click', function() {
+        currentInspectorIdx = (currentInspectorIdx + 1) % inspectorTasks.length;
+        loadInspectorTask(currentInspectorIdx);
+    });
+
+    renderInspectorCode();
+    loadInspectorTask(0);
+
+    const matchingSets = [
+        [
+            { id: 'm1', term: 'Клас', def: 'Шаблон або креслення, що описує спільні властивості та поведінку об’єктів.' },
+            { id: 'm2', term: 'Об’єкт', def: 'Конкретний екземпляр класу, створений у пам’яті програми.' },
+            { id: 'm3', term: 'Інкапсуляція', def: 'Приховування внутрішніх даних об’єкта та захист їх від прямого втручання.' },
+            { id: 'm4', term: 'Наслідування', def: 'Створення нового класу на базі існуючого зі збереженням його властивостей і методів.' },
+            { id: 'm5', term: 'Поліморфізм', def: 'Здатність різних класів по-різному реалізувати метод з однаковою назвою.' },
+            { id: 'm6', term: 'Конструктор __init__', def: 'Метод, який автоматично запускається під час створення об’єкта.' }
+        ],
+        [
+            { id: 'm7', term: 'Параметр self', def: 'Посилання на поточний екземпляр класу, через яке звертаються до його полів і методів.' },
+            { id: 'm8', term: 'Атрибут об’єкта', def: 'Змінна, що зберігає індивідуальні дані конкретного екземпляра класу.' },
+            { id: 'm9', term: 'Метод класу', def: 'Функція всередині класу, яка описує дію, що її може виконувати об’єкт.' },
+            { id: 'm10', term: 'Батьківський клас', def: 'Базовий клас, від якого успадковують код інші класи.' },
+            { id: 'm11', term: 'Дочірній клас', def: 'Клас-спадкоємець, який розширює або змінює функціонал базового класу.' },
+            { id: 'm12', term: 'Приватне поле (__x)', def: 'Атрибут із подвійним підкресленням, доступ до якого обмежений межами класу.' }
+        ]
+    ];
+
+    let currentMatchSetIdx = 0;
+    let selectedTerm = null;
+    let matchedCount = 0;
+
+    function shuffle(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = copy[i];
+            copy[i] = copy[j];
+            copy[j] = temp;
+        }
+        return copy;
+    }
+
+    function initMatching() {
+        const set = matchingSets[currentMatchSetIdx];
+        matchedCount = 0;
+        selectedTerm = null;
+        document.getElementById('matchProgress').textContent = 'Знайдено: 0 / ' + set.length;
+        document.getElementById('matchCompleteMsg').style.display = 'none';
+
+        const termsCol = document.getElementById('matchTermsCol');
+        const defsCol = document.getElementById('matchDefsCol');
+        termsCol.innerHTML = '';
+        defsCol.innerHTML = '';
+
+        shuffle(set).forEach(function(item) {
+            const div = document.createElement('div');
+            div.className = 'match-item';
+            div.textContent = item.term;
+            div.dataset.id = item.id;
+            div.addEventListener('click', function() { selectTerm(div); });
+            termsCol.appendChild(div);
+        });
+
+        shuffle(set).forEach(function(item) {
+            const div = document.createElement('div');
+            div.className = 'match-item';
+            div.textContent = item.def;
+            div.dataset.id = item.id;
+            div.addEventListener('click', function() { selectDef(div); });
+            defsCol.appendChild(div);
+        });
+    }
+
+    function selectTerm(el) {
+        if (el.classList.contains('matched')) return;
+        document.querySelectorAll('#matchTermsCol .match-item').forEach(function(i) { i.classList.remove('selected'); });
+        el.classList.add('selected');
+        selectedTerm = el;
+    }
+
+    function selectDef(el) {
+        if (el.classList.contains('matched') || !selectedTerm) return;
+
+        if (selectedTerm.dataset.id === el.dataset.id) {
+            selectedTerm.classList.remove('selected');
+            selectedTerm.classList.add('matched');
+            el.classList.add('matched');
+            addScore('match_' + el.dataset.id, 5);
+            selectedTerm = null;
+            matchedCount++;
+            const total = matchingSets[currentMatchSetIdx].length;
+            document.getElementById('matchProgress').textContent = 'Знайдено: ' + matchedCount + ' / ' + total;
+            if (matchedCount === total) {
+                document.getElementById('matchCompleteMsg').style.display = 'block';
+            }
+        } else {
+            el.classList.add('shake');
+            setTimeout(function() { el.classList.remove('shake'); }, 400);
+        }
+    }
+
+    document.getElementById('newMatchSetBtn').addEventListener('click', function() {
+        currentMatchSetIdx = (currentMatchSetIdx + 1) % matchingSets.length;
+        initMatching();
+    });
+
+    initMatching();
+
+    const builderTasks = [
+        {
+            title: "Задача 1: Створення класу «Учень» (Student)",
+            desc: "Заповни пропуски так, щоб клас приймав ім'я та клас учня, а метод info() виводив вітання.",
+            template: [
+                { type: 'text', val: '<span class="kw">class</span> <span class="cls">Student</span>:\n    <span class="kw">def</span> ' },
+                { type: 'select', options: ['__init__', 'init', 'create', 'start'], ans: '__init__' },
+                { type: 'text', val: '(' },
+                { type: 'select', options: ['self', 'this', 'Student', 'obj'], ans: 'self' },
+                { type: 'text', val: ', name, grade):\n        self.name = name\n        self.grade = grade\n\n    <span class="kw">def</span> <span class="fn">info</span>(self):\n        <span class="fn">print</span>(<span class="str">f"Учень: {self.name}, {self.grade} клас"</span>)\n\ns1 = ' },
+                { type: 'select', options: ['Student', 'class Student', 'new Student', 'def Student'], ans: 'Student' },
+                { type: 'text', val: '(<span class="str">"Олена"</span>, <span class="num">10</span>)\ns1.<span class="fn">info</span>()' }
+            ],
+            output: "Учень: Олена, 10 клас"
+        },
+        {
+            title: "Задача 2: Обчислення площі прямокутника",
+            desc: "Допиши конструктор та метод area(), який повертає площу прямокутника.",
+            template: [
+                { type: 'text', val: '<span class="kw">class</span> <span class="cls">Rectangle</span>:\n    <span class="kw">def</span> <span class="fn">__init__</span>(self, width, height):\n        ' },
+                { type: 'select', options: ['self.width', 'width', 'Rectangle.width', 'this.width'], ans: 'self.width' },
+                { type: 'text', val: ' = width\n        self.height = height\n\n    <span class="kw">def</span> <span class="fn">area</span>(' },
+                { type: 'select', options: ['self', 'width, height', '()', 'area'], ans: 'self' },
+                { type: 'text', val: '):\n        <span class="kw">return</span> ' },
+                { type: 'select', options: ['self.width * self.height', 'width * height', 'self.width + self.height', 'area'], ans: 'self.width * self.height' },
+                { type: 'text', val: '\n\nrect = <span class="cls">Rectangle</span>(<span class="num">5</span>, <span class="num">4</span>)\n<span class="fn">print</span>(<span class="str">"Площа:"</span>, rect.<span class="fn">area</span>())' }
+            ],
+            output: "Площа: 20"
+        },
+        {
+            title: "Задача 3: Наслідування класів",
+            desc: "Створи дочірній клас ElectricCar, який успадковує базовий клас Car.",
+            template: [
+                { type: 'text', val: '<span class="kw">class</span> <span class="cls">Car</span>:\n    <span class="kw">def</span> <span class="fn">move</span>(self):\n        <span class="fn">print</span>(<span class="str">"Автомобіль рухається"</span>)\n\n<span class="kw">class</span> <span class="cls">ElectricCar</span>(' },
+                { type: 'select', options: ['Car', 'self', 'object', 'move'], ans: 'Car' },
+                { type: 'text', val: '):\n    <span class="kw">def</span> <span class="fn">charge</span>(self):\n        <span class="fn">print</span>(<span class="str">"Батарея заряджається..."</span>)\n\ntesla = <span class="cls">ElectricCar</span>()\ntesla.' },
+                { type: 'select', options: ['move()', 'Car()', 'self()', 'class()'], ans: 'move()' },
+                { type: 'text', val: '\ntesla.<span class="fn">charge</span>()' }
+            ],
+            output: "Автомобіль рухається\nБатарея заряджається..."
+        },
+        {
+            title: "Задача 4: Поліморфізм у дії",
+            desc: "Налаштуй цикл, який викликає однаковий метод voice() для різних об'єктів.",
+            template: [
+                { type: 'text', val: '<span class="kw">class</span> <span class="cls">Dog</span>:\n    <span class="kw">def</span> <span class="fn">voice</span>(self): <span class="fn">print</span>(<span class="str">"Гав!"</span>)\n\n<span class="kw">class</span> <span class="cls">Cat</span>:\n    <span class="kw">def</span> <span class="fn">voice</span>(self): <span class="fn">print</span>(<span class="str">"Мяу!"</span>)\n\npets = [' },
+                { type: 'select', options: ['Dog(), Cat()', 'Dog, Cat', 'voice()', 'self'], ans: 'Dog(), Cat()' },
+                { type: 'text', val: ']\n<span class="kw">for</span> pet <span class="kw">in</span> pets:\n    pet.' },
+                { type: 'select', options: ['voice()', 'Dog()', 'print()', '__init__()'], ans: 'voice()' }
+            ],
+            output: "Гав!\nМяу!"
+        }
+    ];
+
+    let currentBuilderIdx = 0;
+
+    function loadBuilderTask(idx) {
+        const task = builderTasks[idx];
+        document.getElementById('builderProgress').textContent = 'Задача ' + (idx + 1) + ' / ' + builderTasks.length;
+        document.getElementById('builderTitle').textContent = task.title;
+        document.getElementById('builderDesc').textContent = task.desc;
+
+        const container = document.getElementById('builderCodeContainer');
+        container.innerHTML = '';
+
+        let selIndex = 0;
+        task.template.forEach(function(part) {
+            if (part.type === 'text') {
+                const span = document.createElement('span');
+                span.style.whiteSpace = 'pre';
+                span.innerHTML = part.val;
+                container.appendChild(span);
+            } else if (part.type === 'select') {
+                const select = document.createElement('select');
+                select.className = 'code-select';
+                select.dataset.ans = part.ans;
+                select.dataset.idx = selIndex++;
+
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = '--- обери ---';
+                select.appendChild(defaultOpt);
+
+                part.options.forEach(function(optText) {
+                    const opt = document.createElement('option');
+                    opt.value = optText;
+                    opt.textContent = optText;
+                    select.appendChild(opt);
+                });
+
+                container.appendChild(select);
+            }
+        });
+
+        document.getElementById('builderFeedback').className = 'feedback-box';
+        document.getElementById('builderConsole').style.display = 'none';
+    }
+
+    document.getElementById('checkBuilderBtn').addEventListener('click', function() {
+        const selects = document.querySelectorAll('#builderCodeContainer .code-select');
+        let allCorrect = true;
+        let allFilled = true;
+
+        selects.forEach(function(sel) {
+            sel.classList.remove('correct-sel', 'wrong-sel');
+            if (!sel.value) {
+                allFilled = false;
+                allCorrect = false;
+                sel.classList.add('wrong-sel');
+            } else if (sel.value === sel.dataset.ans) {
+                sel.classList.add('correct-sel');
+            } else {
+                allCorrect = false;
+                sel.classList.add('wrong-sel');
+            }
+        });
+
+        const fb = document.getElementById('builderFeedback');
+        const consoleBox = document.getElementById('builderConsole');
+
+        if (!allFilled) {
+            fb.className = 'feedback-box error';
+            fb.textContent = '⚠️ Заповни всі пропуски у коді перед перевіркою!';
+            consoleBox.style.display = 'none';
+            return;
+        }
+
+        if (allCorrect) {
+            fb.className = 'feedback-box success';
+            fb.textContent = '✅ Код зібрано без помилок! Програму успішно виконано (+15 балів).';
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML = '<strong>Виведення консолі Python:</strong><br><pre style="margin-top:0.4rem;">' + builderTasks[currentBuilderIdx].output + '</pre>';
+            addScore('builder_' + currentBuilderIdx, 15);
+        } else {
+            fb.className = 'feedback-box error';
+            fb.textContent = '❌ У коді є помилки (виділені червоним). Виправ їх та запусти ще раз.';
+            consoleBox.style.display = 'none';
+        }
+    });
+
+    document.getElementById('resetBuilderBtn').addEventListener('click', function() {
+        loadBuilderTask(currentBuilderIdx);
+    });
+
+    document.getElementById('nextBuilderBtn').addEventListener('click', function() {
+        currentBuilderIdx = (currentBuilderIdx + 1) % builderTasks.length;
+        loadBuilderTask(currentBuilderIdx);
+    });
+
+    loadBuilderTask(0);
+
+    const quizQuestions = [
+        {
+            q: "Що таке клас в об'єктно-орієнтованому програмуванні?",
+            options: [
+                "Конкретна змінна, що зберігає числове значення",
+                "Шаблон (модель), який описує спільні атрибути та методи об'єктів",
+                "Вбудований цикл для перебору списків у Python",
+                "Окрема бібліотека для роботи з графікою"
+            ],
+            ans: 1
+        },
+        {
+            q: "Яке ключове слово використовується в Python для створення нового класу?",
+            options: ["def", "object", "class", "struct"],
+            ans: 2
+        },
+        {
+            q: "Для чого призначений метод __init__ у класі Python?",
+            options: [
+                "Для видалення об'єкта з пам'яті",
+                "Для автоматичної ініціалізації атрибутів під час створення об'єкта",
+                "Для виведення тексту на екран",
+                "Для імпорту зовнішніх модулів"
+            ],
+            ans: 1
+        },
+        {
+            q: "Що означає перший параметр self у методах класу?",
+            options: [
+                "Посилання на поточний екземпляр (об'єкт) класу",
+                "Назву батьківського класу",
+                "Глобальну змінну програми",
+                "Кількість створених об'єктів"
+            ],
+            ans: 0
+        },
+        {
+            q: "Який принцип ООП забезпечує захист внутрішніх даних об'єкта від прямого доступу ззовні?",
+            options: ["Поліморфізм", "Наслідування", "Інкапсуляція", "Рекурсія"],
+            ans: 2
+        },
+        {
+            q: "Як у Python правильно записати, що клас Dog успадковує клас Animal?",
+            options: [
+                "class Dog -> Animal:",
+                "class Dog inherits Animal:",
+                "class Dog(Animal):",
+                "class Animal(Dog):"
+            ],
+            ans: 2
+        },
+        {
+            q: "Як у класі Python позначається приватний атрибут?",
+            options: [
+                "private age",
+                "self.__age",
+                "self._age_",
+                "const age"
+            ],
+            ans: 1
+        },
+        {
+            q: "Як називається здатність об'єктів різних класів по-різному виконувати метод з однаковою назвою?",
+            options: ["Інкапсуляція", "Абстракція", "Поліморфізм", "Ініціалізація"],
+            ans: 2
+        },
+        {
+            q: "Що виведе наступний код?\nclass Box:\n    def __init__(self, w):\n        self.w = w * 2\nb = Box(5)\nprint(b.w)",
+            options: ["5", "10", "Box(5)", "Помилку виконання"],
+            ans: 1
+        },
+        {
+            q: "Скільки об'єктів (екземплярів) можна створити на основі одного класу?",
+            options: [
+                "Лише один",
+                "Не більше двох",
+                "Довільну кількість (обмежену лише пам'яттю комп'ютера)",
+                "Жодного, клас не створює об'єкти"
+            ],
+            ans: 2
+        }
+    ];
+
+    let quizIdx = 0;
+    let userQuizAnswers = [];
+
+    function renderQuizQuestion() {
+        const body = document.getElementById('quizBody');
+        const counter = document.getElementById('quizCounter');
+        const fill = document.getElementById('quizProgressFill');
+
+        if (quizIdx >= quizQuestions.length) {
+            showQuizResults();
+            return;
+        }
+
+        counter.textContent = 'Запитання ' + (quizIdx + 1) + ' / ' + quizQuestions.length;
+        fill.style.width = ((quizIdx / quizQuestions.length) * 100) + '%';
+
+        const qObj = quizQuestions[quizIdx];
+
+        let optionsHtml = '';
+        qObj.options.forEach(function(opt, i) {
+            optionsHtml += '<button type="button" class="quiz-option" data-idx="' + i + '">' + opt + '</button>';
+        });
+
+        body.innerHTML =
+            '<h3 style="margin-bottom: 1rem; font-size: 1.15rem; white-space: pre-line;">' + qObj.q + '</h3>' +
+            '<div class="quiz-options" id="quizOptionsList">' + optionsHtml + '</div>' +
+            '<div style="display: flex; justify-content: flex-end; margin-top: 1rem;">' +
+                '<button type="button" class="btn" id="nextQuizQBtn" disabled>Відповісти →</button>' +
+            '</div>';
+
+        let selectedOpt = null;
+        const optBtns = body.querySelectorAll('.quiz-option');
+        const nextBtn = document.getElementById('nextQuizQBtn');
+
+        optBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                optBtns.forEach(function(b) { b.classList.remove('selected'); });
+                btn.classList.add('selected');
+                selectedOpt = parseInt(btn.getAttribute('data-idx'), 10);
+                nextBtn.disabled = false;
+            });
+        });
+
+        nextBtn.addEventListener('click', function() {
+            userQuizAnswers.push(selectedOpt);
+            if (selectedOpt === qObj.ans) {
+                addScore('quiz_' + quizIdx, 10);
+            }
+            quizIdx++;
+            renderQuizQuestion();
+        });
+    }
+
+    function showQuizResults() {
+        document.getElementById('quizCounter').textContent = 'Тест завершено!';
+        document.getElementById('quizProgressFill').style.width = '100%';
+
+        let correctCount = 0;
+        quizQuestions.forEach(function(q, i) {
+            if (userQuizAnswers[i] === q.ans) correctCount++;
+        });
+
+        const percent = Math.round((correctCount / quizQuestions.length) * 100);
+        let grade12 = Math.max(1, Math.round((correctCount / quizQuestions.length) * 12));
+        if (correctCount === 0) grade12 = 1;
+
+        let verdict = '';
+        if (grade12 >= 10) verdict = 'Високий рівень! Ти чудово засвоїв основи ООП.';
+        else if (grade12 >= 7) verdict = 'Достатній рівень! Гарний результат, але варто повторити окремі деталі.';
+        else if (grade12 >= 4) verdict = 'Середній рівень. Переглянь шпаргалку та спробуй ще раз.';
+        else verdict = 'Початковий рівень. Ознайомся з теорією у вкладці «Довідник».';
+
+        let reviewHtml = '<h4>Детальний огляд відповідей:</h4>';
+        quizQuestions.forEach(function(q, i) {
+            const isOk = userQuizAnswers[i] === q.ans;
+            const borderColor = isOk ? 'var(--success)' : 'var(--error)';
+            const firstLine = q.q.split('\n')[0];
+            reviewHtml +=
+                '<div class="review-item" style="border-left: 4px solid ' + borderColor + '">' +
+                    '<div style="font-weight: 600; margin-bottom: 0.35rem;">' + (i + 1) + '. ' + firstLine + '</div>' +
+                    '<div style="font-size: 0.9rem; color: ' + borderColor + '">' +
+                        'Твоя відповідь: ' + q.options[userQuizAnswers[i]] + ' ' + (isOk ? '✅' : '❌') +
+                    '</div>' +
+                    (!isOk ? '<div style="font-size: 0.9rem; color: var(--success); margin-top: 0.2rem;">Правильна відповідь: ' + q.options[q.ans] + '</div>' : '') +
+                '</div>';
+        });
+
+        const body = document.getElementById('quizBody');
+        body.innerHTML =
+            '<div class="result-card">' +
+                '<div class="grade-circle">' +
+                    '<span class="grade-num">' + grade12 + '</span>' +
+                    '<span class="grade-label">із 12 балів</span>' +
+                '</div>' +
+                '<h3>Правильних відповідей: ' + correctCount + ' з ' + quizQuestions.length + ' (' + percent + '%)</h3>' +
+                '<p style="color: var(--text-secondary); margin: 0.5rem 0 1.25rem;">' + verdict + '</p>' +
+                '<button type="button" class="btn" id="restartQuizBtn">Пройти тест знову</button>' +
+                '<div class="review-list">' + reviewHtml + '</div>' +
+            '</div>';
+
+        document.getElementById('restartQuizBtn').addEventListener('click', function() {
+            quizIdx = 0;
+            userQuizAnswers = [];
+            renderQuizQuestion();
+        });
+    }
+
+    renderQuizQuestion();
+
+    document.getElementById('resetAllBtn').addEventListener('click', function() {
+        totalScore = 0;
+        completedTasks.clear();
+        document.getElementById('totalScoreDisplay').textContent = 'Бали: 0';
+        currentInspectorIdx = 0;
+        loadInspectorTask(0);
+        currentMatchSetIdx = 0;
+        initMatching();
+        currentBuilderIdx = 0;
+        loadBuilderTask(0);
+        quizIdx = 0;
+        userQuizAnswers = [];
+        renderQuizQuestion();
+    });
+});
+</script>
+
+</body>
+</html>
